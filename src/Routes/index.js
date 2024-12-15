@@ -1,8 +1,8 @@
 const express = require("express");
-const route = express.Router();
+const _ = express.Router();
 
-route.get("/sh", (req, res) => {
+_.get("/api/v1/sh", (req, res) => {
   res.end("hello");
 });
 
-module.exports = route;
+module.exports = _;

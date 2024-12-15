@@ -7,7 +7,6 @@ Databasebconncet()
     app.listen(process.env.PORT || 5000, () => {
       console.log("Server is running on port 3000");
     });
-    console.log("database url", process.env.DATABASE_URL);
   })
   .catch((err) => {
     console.log("From index.js database conncetion error", err);
