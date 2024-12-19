@@ -1,8 +1,5 @@
 const express = require("express");
 const _ = express.Router();
-
-_.get("/api/v1/sh", (req, res) => {
-  res.end("hello");
-});
-
+const allRoutes = require("./auth.apiRoutes");
+_.use("/api/v1/auth", allRoutes);
 module.exports = _;
