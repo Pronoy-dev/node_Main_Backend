@@ -26,7 +26,7 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-    adress1: {
+    adress2: {
       type: String,
       trim: true,
     },

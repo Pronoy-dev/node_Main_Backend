@@ -3,6 +3,8 @@ const { apiResponse } = require("../utils/ApiResponse");
 
 const registration = async (req, res) => {
   try {
+    const { firstName, email, phoneNumber, adress1, password } = req.body;
+
     res
       .status(200)
       .json(new apiResponse(200, "registration succesful", null, false));
