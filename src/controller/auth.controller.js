@@ -6,6 +6,7 @@ const {
   passwordChecker,
   phoneNumberChecker,
 } = require("../utils/checker");
+const { otpGenerator } = require("../helpers/OtpGenerator");
 const { SendMail } = require("../helpers/nodemailer");
 
 const registration = async (req, res) => {
@@ -41,6 +42,7 @@ const registration = async (req, res) => {
           )
         );
     }
+
     // Check isAlready Exist user in database
     const isAlreadyExistuser = await userModel.find({
       $or: [
@@ -65,8 +67,21 @@ const registration = async (req, res) => {
       ...(lastName && { lastName }),
       ...(adress2 && { adress2: adress2 }),
     });
+
+    // make a otp
+    const otp = await otpGenerator();
     // Send a verification Mail
-    await SendMail();
+    const messageId = await SendMail(firstName, otp, email);
+    if (messageId) {
+      console.log(messageId);
+
+      const updatedUser = await userModel.findOneAndUpdate(
+        { email: email },
+        { otp: otp },
+        { new: true }
+      );
+      console.log(updatedUser);
+    }
 
     return res
       .status(200)

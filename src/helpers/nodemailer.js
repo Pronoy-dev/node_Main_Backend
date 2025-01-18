@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { emailTemplate } = require("./emailTemplate");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -9,17 +10,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const SendMail = async () => {
+const SendMail = async (firstName, otp, email) => {
   const info = await transporter.sendMail({
     from: "Pronoy-dev",
-    to: "propronoy2@gmail.com",
+    to: `${email}`,
     subject: "verification mail",
-    html: `<h1>Hello</h1>
-        <button>Click</button>
-        `,
+    html: emailTemplate(firstName, otp),
   });
 
-  console.log("Message sent: %s", info.messageId);
+  return info.messageId;
 };
 
 module.exports = { SendMail };
