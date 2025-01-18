@@ -6,6 +6,7 @@ const {
   passwordChecker,
   phoneNumberChecker,
 } = require("../utils/checker");
+const { SendMail } = require("../helpers/nodemailer");
 
 const registration = async (req, res) => {
   try {
@@ -40,6 +41,20 @@ const registration = async (req, res) => {
           )
         );
     }
+    // Check isAlready Exist user in database
+    const isAlreadyExistuser = await userModel.find({
+      $or: [
+        { firstName: firstName },
+        { email: email },
+        { phoneNumber: phoneNumber },
+      ],
+    });
+    if (isAlreadyExistuser.length) {
+      return res
+        .status(401)
+        .json(new apiError(401, null, null, `User already exist`));
+    }
+
     // now save the userInfo into database
     const saveUserInfo = await userModel.create({
       firstName,
@@ -48,7 +63,10 @@ const registration = async (req, res) => {
       adress1,
       password,
       ...(lastName && { lastName }),
+      ...(adress2 && { adress2: adress2 }),
     });
+    // Send a verification Mail
+    await SendMail();
 
     return res
       .status(200)

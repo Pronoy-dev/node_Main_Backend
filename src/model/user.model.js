@@ -14,12 +14,12 @@ const userSchema = new Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     phoneNumber: {
       type: String,
       required: true,
-      unique: true,
+      // unique: true,
     },
     adress1: {
       type: String,
@@ -33,7 +33,6 @@ const userSchema = new Schema(
     password: {
       type: String,
       required: true,
-      unique: true,
     },
     isVerified: {
       type: Boolean,
