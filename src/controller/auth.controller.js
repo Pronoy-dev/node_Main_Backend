@@ -9,6 +9,7 @@ const {
 const { otpGenerator } = require("../helpers/OtpGenerator");
 const { SendMail } = require("../helpers/nodemailer");
 const { makeHashPassword, compareHashPassword } = require("../helpers/bcrypt");
+const { GenerateToken } = require("../helpers/jwtToken");
 
 const registration = async (req, res) => {
   try {
@@ -78,7 +79,11 @@ const registration = async (req, res) => {
       console.log(messageId);
 
       const updatedUser = await userModel
-        .findOneAndUpdate({ email: email }, { otp: otp }, { new: true })
+        .findOneAndUpdate(
+          { email: email },
+          { otp: otp, otpExpireDate: new Date().getTime() + 2 * 60 * 1000 },
+          { new: true }
+        )
         .select("-email -phoneNumber -password -role -createdAt -otp");
       return res
         .status(200)
@@ -116,14 +121,35 @@ const login = async (req, res) => {
         password,
         checkisRegisteredUser.password
       );
+
       if (!passwordIsCorrect) {
         return res
           .status(400)
           .json(new apiError(400, null, null, `Password doesn't match`));
       }
+      const userInfo = {
+        _id: checkisRegisteredUser._id,
+        firstName: checkisRegisteredUser.firstName,
+        email: checkisRegisteredUser.email,
+        phoneNumber: checkisRegisteredUser.phoneNumber,
+      };
+      const token = await GenerateToken(userInfo);
+      const selectedResponse = {
+        firstName: checkisRegisteredUser.firstName,
+        lastName: checkisRegisteredUser.lastName,
+      };
+
       return res
         .status(500)
-        .json(new apiError(500, null, null, `Login successful`));
+        .cookie("token", token)
+        .json(
+          new apiError(
+            500,
+            null,
+            { data: { token: `Bearer ${token}`, ...selectedResponse } },
+            `Login successful`
+          )
+        );
     }
     console.log(checkisRegisteredUser);
   } catch (error) {
@@ -133,4 +159,35 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { registration, login };
+//  verifyOtp Controller
+const verifyOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res
+        .status(400)
+        .json(new apiError(400, null, null, `email or otp missing `));
+    }
+    const matchOtp = await userModel.findOne({ email: email });
+    if (matchOtp.otpExpireDate >= new Date().getTime() && matchOtp.otp == otp) {
+      const removeOtpCredential = await userModel.findOneAndUpdate(
+        { email },
+        { otp: null, otpExpireDate: null },
+        { new: true }
+      );
+      if (removeOtpCredential) {
+        return res
+          .status(500)
+          .json(new apiError(500, null, null, `otp verify done `));
+      }
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(500, null, null, `verifyOtp controller error: ${error}`)
+      );
+  }
+};
+
+module.exports = { registration, login, verifyOtp };

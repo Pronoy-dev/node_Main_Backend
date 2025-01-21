@@ -46,6 +46,9 @@ const userSchema = new Schema(
     otp: {
       type: Number,
     },
+    otpExpireDate: {
+      type: Number,
+    },
     image: {
       type: String,
     },
