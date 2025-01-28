@@ -11,7 +11,3 @@ Databasebconncet()
   .catch((err) => {
     console.log("From index.js database conncetion error", err);
   });
-
-// propronoy3
-// 47GhoLdaaJVkYPuD
-// mongodb+srv://propronoy3:47GhoLdaaJVkYPuD@cluster0.wigho.mongodb.net/
